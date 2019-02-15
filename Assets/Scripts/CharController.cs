@@ -10,6 +10,7 @@ public class CharController : MonoBehaviour
     public AudioSource rest;
     public AudioSource idle2;
 
+
     // Start is called before the first frame update
     void Start()
     {

@@ -117,6 +117,7 @@ namespace UnityChan
 			// 現在のベースレイヤーがlocoStateの時
 			if (currentBaseState.fullPathHash == locoState) {
 				//カーブでコライダ調整をしている時は、念のためにリセットする
+                idleTime = 0;
 				if (useCurves) {
 					resetCollider ();
 				}
