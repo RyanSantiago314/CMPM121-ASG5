@@ -41,6 +41,7 @@ namespace UnityChan
 		private Vector3 orgVectColCenter;
 		private Animator anim;							// キャラにアタッチされるアニメーターへの参照
 		private AnimatorStateInfo currentBaseState;			// base layerで使われる、アニメーターの現在の状態の参照
+        private int idleTime = 0;
 
 		private GameObject cameraObject;	// メインカメラへの参照
 		
@@ -49,6 +50,7 @@ namespace UnityChan
 		static int locoState = Animator.StringToHash ("Base Layer.Locomotion");
 		static int jumpState = Animator.StringToHash ("Base Layer.Jump");
 		static int restState = Animator.StringToHash ("Base Layer.Rest");
+        static int waitState = Animator.StringToHash ("Base Layer.IdleAnim2");
 
 		// 初期化
 		void Start ()
@@ -122,8 +124,6 @@ namespace UnityChan
 		// JUMP中の処理
 		// 現在のベースレイヤーがjumpStateの時
 		else if (currentBaseState.fullPathHash == jumpState) {
-				cameraObject.SendMessage ("setCameraPositionJumpView");	// ジャンプ中のカメラに変更
-				// ステートがトランジション中でない場合
 				if (!anim.IsInTransition (0)) {
 				
 					// 以下、カーブ調整をする場合の処理
@@ -159,22 +159,49 @@ namespace UnityChan
 		// 現在のベースレイヤーがidleStateの時
 		else if (currentBaseState.fullPathHash == idleState) {
 				//カーブでコライダ調整をしている時は、念のためにリセットする
+                idleTime++;
 				if (useCurves) {
 					resetCollider ();
 				}
+
+                if (idleTime > 360)
+                {
+                    int rand = Random.Range(0, 2);
+
+                    switch (rand)
+                    {
+                        case 0:
+                            anim.SetBool("Rest", true);
+                            break;
+                        case 1:
+                            anim.SetBool("IdleAnim2", true);
+                            break;
+                        default:
+                            anim.SetBool("IdleAnim2", true);
+                            break;
+                    }
+                    
+                    idleTime = 0;
+                }
 				// スペースキーを入力したらRest状態になる
-				if (Input.GetButtonDown ("Jump")) {
-					anim.SetBool ("Rest", true);
+				if (Input.GetButtonDown ("Jump") && !anim.IsInTransition (0)) {
+                    rb.AddForce (Vector3.up * jumpPower, ForceMode.VelocityChange);
+					anim.SetBool ("Jump", true);
 				}
 			}
 		// REST中の処理
 		// 現在のベースレイヤーがrestStateの時
-		else if (currentBaseState.fullPathHash == restState) {
+		else if (currentBaseState.fullPathHash == restState || currentBaseState.fullPathHash == waitState) {
 				//cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
 				// ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
 				if (!anim.IsInTransition (0)) {
 					anim.SetBool ("Rest", false);
+                    anim.SetBool("IdleAnim2", false);
 				}
+                if (Input.GetButtonDown ("Jump") && !anim.IsInTransition (0)) {
+                    rb.AddForce (Vector3.up * jumpPower, ForceMode.VelocityChange);
+                    anim.SetBool ("Jump", true);
+                }
 			}
 		}
 
