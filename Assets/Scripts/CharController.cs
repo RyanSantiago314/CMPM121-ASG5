@@ -9,13 +9,22 @@ public class CharController : MonoBehaviour
     public AudioSource run;
     public AudioSource rest;
     public AudioSource idle2;
+    public AudioSource hooray;
+
+    public float openSpeed = 4f;
+    public GameObject HallDoor;
+    public ParticleSystem sparkly;
+    public ParticleSystem important;
+
+    private bool HallDoorOpen = false;
+    public bool GotCard = false;
 
 
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animator> ();
-        run.volume = 0f;
+        run.volume = 0f; 
     }
 
     // Update is called once per frame
@@ -32,5 +41,41 @@ public class CharController : MonoBehaviour
             idle2.Play();
         if (anim.GetBool("Rest"))
             rest.Play();
+
+        if (HallDoorOpen && HallDoor.transform.position.y < 10)
+        {
+            HallDoor.transform.position += new Vector3(0, openSpeed * Time.deltaTime, 0);
+        }
+        else if (HallDoorOpen){}
+        else if (!HallDoorOpen && HallDoor.transform.position.y > 3.5)
+        {
+            HallDoor.transform.position -= new Vector3(0, openSpeed/2 * Time.deltaTime, 0);
+        }
     }
+
+    void OnTriggerEnter(Collider other) 
+    {
+        if(other.gameObject.CompareTag("Card"))
+        {
+            hooray.Play();
+            GotCard = true;
+            sparkly.Play();
+            important.Play();
+            Destroy(other.gameObject);
+            transform.GetChild(6).GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+        }
+        if (other.gameObject.CompareTag("Hall"))
+        {
+            HallDoorOpen = true;
+        }
+    }
+
+    void OnTriggerExit(Collider other) 
+    {
+        if (other.gameObject.CompareTag("Hall"))
+        {
+            HallDoorOpen = false;
+        }
+    }
+
 }
