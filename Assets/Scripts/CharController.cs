@@ -37,7 +37,7 @@ public class CharController : MonoBehaviour
     void Start()
     {
         anim = GetComponent<Animator> ();
-        hello.PlayDelayed(2);
+        hello.PlayDelayed(2.2f);
         run.volume = 0f;
         textTimer = 0;
     }
@@ -50,14 +50,14 @@ public class CharController : MonoBehaviour
         else
             run.volume -= 0.1f;
 
-        if (anim.GetBool("Jump"))
-            jump.Play();
-        if (anim.GetBool("IdleAnim"))
-            idle.PlayDelayed(2);
         if (anim.GetBool("IdleAnim2"))
             trip.Play();
-        if (anim.GetBool("Rest"))
-            rest.Play();
+        else if (anim.GetBool("Jump"))
+            jump.Play();
+        else if (anim.GetBool("IdleAnim"))
+            idle.PlayDelayed(.5f);
+        else if (anim.GetBool("Rest"))
+            rest.PlayDelayed(2f);
 
         if (HallDoorOpen && HallDoor.transform.position.y < 10)
         {

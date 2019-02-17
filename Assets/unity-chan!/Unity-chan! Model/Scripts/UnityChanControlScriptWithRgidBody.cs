@@ -43,6 +43,8 @@ namespace UnityChan
 		private AnimatorStateInfo currentBaseState;			// base layerで使われる、アニメーターの現在の状態の参照
         private int idleTime = 0;
 
+        public AudioSource baka;
+
 		private GameObject cameraObject;	// メインカメラへの参照
 		
 		// アニメーター各ステートへの参照
@@ -76,7 +78,7 @@ namespace UnityChan
 		void FixedUpdate ()
 		{
             currentBaseState = anim.GetCurrentAnimatorStateInfo (0);    // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-            
+
             if (gameStart)
             {
 			     float h = Input.GetAxis ("Horizontal");				// 入力デバイスの水平軸をhで定義
@@ -236,6 +238,12 @@ namespace UnityChan
         public void restartGame()
         {
             gameStart = false;
+        }
+
+        public void ClickOnUnityChan()
+        {
+            anim.SetBool("IdleAnim2", true);
+            baka.PlayDelayed(.8f);
         }
 	}
 }
