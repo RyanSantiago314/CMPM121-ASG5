@@ -19,6 +19,7 @@ public class CharController : MonoBehaviour
     public float openSpeed = 4f;
     public GameObject HallDoor;
     public GameObject SecondDoor;
+    public GameObject KeyCard;
 
     public ParticleSystem sparkly;
     public ParticleSystem important;
@@ -27,8 +28,8 @@ public class CharController : MonoBehaviour
     private bool HallDoorOpen = false;
     private bool SecondDoorOpen = false;
     private bool SwitchedOn = false;
-    public bool GotCard = false;
 
+    bool GotCard = false;
     string line = "";
     int textTimer;
 
@@ -122,7 +123,7 @@ public class CharController : MonoBehaviour
             sparkly.Play();
             important.Play();
             other.gameObject.SetActive(false);
-            transform.GetChild(6).GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+            transform.GetChild(6).gameObject.SetActive(true);
             line = "Sweet! A keycard! This'll let me open that door over there!";
         }
         else if (other.gameObject.CompareTag("Hall"))
@@ -135,7 +136,7 @@ public class CharController : MonoBehaviour
             {
                 turnOn.Play();
                 hooray.Play();
-                Destroy(transform.GetChild(6).GetChild(0).gameObject);
+                transform.GetChild(6).gameObject.SetActive(false);
                 SwitchedOn = true;
                 line = "Access granted. Welcome, Unreal-kun!";
                 textTimer = 0;
@@ -156,6 +157,10 @@ public class CharController : MonoBehaviour
                 line = "Only authorized personnel may enter. Please present your keycard.";
                 textTimer = 0;
             }
+        }
+        else if (other.gameObject.CompareTag("Watch"))
+        {
+            Restart();
         }
     }
 
@@ -179,6 +184,16 @@ public class CharController : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    void Restart()
+    {
+        SwitchedOn = false;
+        turnOn.Stop();
+        GotCard = false;
+        KeyCard.SetActive(true);
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
     }
 
 }

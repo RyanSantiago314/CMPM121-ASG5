@@ -19,6 +19,8 @@ namespace UnityChan
         bool gameStart = false;
 
         public GameObject Canvas;
+
+        public UnityChanControlScriptWithRgidBody script;
 	
 	
 		void Start ()
@@ -36,6 +38,7 @@ namespace UnityChan
 	
 		void FixedUpdate ()	// このカメラ切り替えはFixedUpdate()内でないと正常に動かない
 		{
+            gameStart = script.gameStart;
             Canvas.SetActive(!gameStart);
 
 			if (gameStart)
@@ -43,6 +46,11 @@ namespace UnityChan
 				// return the camera to standard position and direction
 				setCameraPositionNormalView ();
 			}
+            else
+            {
+                transform.position = Vector3.Lerp (transform.position, frontPos.position, Time.fixedDeltaTime * smooth); 
+                transform.forward = Vector3.Lerp (transform.forward, frontPos.forward, Time.fixedDeltaTime * smooth);
+            }
 		}
 
 		void setCameraPositionNormalView ()
@@ -62,11 +70,6 @@ namespace UnityChan
         public void openGame()
         {
             gameStart = true;
-        }
-
-        public void restartGame()
-        {
-            gameStart = false;
         }
 	}
 }

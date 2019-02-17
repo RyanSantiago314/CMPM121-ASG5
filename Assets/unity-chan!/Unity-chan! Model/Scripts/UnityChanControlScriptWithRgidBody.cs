@@ -55,7 +55,7 @@ namespace UnityChan
         static int waitState = Animator.StringToHash ("Base Layer.IdleAnim");
         static int waitState2 = Animator.StringToHash ("Base Layer.IdleAnim2");
 
-        bool gameStart = false;
+        public bool gameStart = false;
 
 		// 初期化
 		void Start ()
@@ -221,6 +221,15 @@ namespace UnityChan
 			}
 		}
 
+        void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.CompareTag("Watch"))
+            {
+                anim.SetFloat("Speed", 0);
+                gameStart = false;
+            }
+        }
+
 
 		// キャラクターのコライダーサイズのリセット関数
 		void resetCollider ()
@@ -233,11 +242,6 @@ namespace UnityChan
         public void openGame()
         {
             gameStart = true;
-        }
-
-        public void restartGame()
-        {
-            gameStart = false;
         }
 
         public void ClickOnUnityChan()

@@ -9,6 +9,7 @@ TagManager:
   - Room2
   - Card
   - Terminal
+  - Watch
   layers:
   - Default
   - TransparentFX
