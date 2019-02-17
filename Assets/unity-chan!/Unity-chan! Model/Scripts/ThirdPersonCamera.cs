@@ -16,6 +16,9 @@ namespace UnityChan
 	
 		// スムーズに繋がない時（クイック切り替え）用のブーリアンフラグ
 		bool bQuickSwitch = false;	//Change Camera Position Quickly
+        bool gameStart = false;
+
+        public GameObject Canvas;
 	
 	
 		void Start ()
@@ -27,18 +30,16 @@ namespace UnityChan
 				frontPos = GameObject.Find ("FrontPos").transform;
 
 			//カメラをスタートする
-			transform.position = standardPos.position;	
-			transform.forward = standardPos.forward;	
+			//transform.position = standardPos.position;	
+			//transform.forward = standardPos.forward;	
 		}
 	
 		void FixedUpdate ()	// このカメラ切り替えはFixedUpdate()内でないと正常に動かない
 		{
-		
-			if (Input.GetButton ("Fire1")) {	// left Ctlr	
-				// Change Front Camera
-				setCameraPositionFrontView ();
-			} 
-			else {	
+            Canvas.SetActive(!gameStart);
+
+			if (gameStart)
+            {
 				// return the camera to standard position and direction
 				setCameraPositionNormalView ();
 			}
@@ -57,13 +58,15 @@ namespace UnityChan
 				bQuickSwitch = false;
 			}
 		}
-	
-		void setCameraPositionFrontView ()
-		{
-			// Change Front Camera
-			bQuickSwitch = true;
-			transform.position = frontPos.position;	
-			transform.forward = frontPos.forward;
-		}
+
+        public void openGame()
+        {
+            gameStart = true;
+        }
+
+        public void restartGame()
+        {
+            gameStart = false;
+        }
 	}
 }

@@ -50,7 +50,10 @@ namespace UnityChan
 		static int locoState = Animator.StringToHash ("Base Layer.Locomotion");
 		static int jumpState = Animator.StringToHash ("Base Layer.Jump");
 		static int restState = Animator.StringToHash ("Base Layer.Rest");
-        static int waitState = Animator.StringToHash ("Base Layer.IdleAnim2");
+        static int waitState = Animator.StringToHash ("Base Layer.IdleAnim");
+        static int waitState2 = Animator.StringToHash ("Base Layer.IdleAnim2");
+
+        bool gameStart = false;
 
 		// 初期化
 		void Start ()
@@ -65,63 +68,68 @@ namespace UnityChan
 			// CapsuleColliderコンポーネントのHeight、Centerの初期値を保存する
 			orgColHight = col.height;
 			orgVectColCenter = col.center;
+            currentBaseState = anim.GetCurrentAnimatorStateInfo (0);
 		}
 	
 	
 		// 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
 		void FixedUpdate ()
 		{
-			float h = Input.GetAxis ("Horizontal");				// 入力デバイスの水平軸をhで定義
-			float v = Input.GetAxis ("Vertical");				// 入力デバイスの垂直軸をvで定義
-			anim.SetFloat ("Speed", v);							// Animator側で設定している"Speed"パラメタにvを渡す
-			anim.SetFloat ("Direction", h); 						// Animator側で設定している"Direction"パラメタにhを渡す
-			anim.speed = animSpeed;								// Animatorのモーション再生速度に animSpeedを設定する
-			currentBaseState = anim.GetCurrentAnimatorStateInfo (0);	// 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-			rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
+            currentBaseState = anim.GetCurrentAnimatorStateInfo (0);    // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
+            
+            if (gameStart)
+            {
+			     float h = Input.GetAxis ("Horizontal");				// 入力デバイスの水平軸をhで定義
+			     float v = Input.GetAxis ("Vertical");				// 入力デバイスの垂直軸をvで定義
+			     anim.SetFloat ("Speed", v);							// Animator側で設定している"Speed"パラメタにvを渡す
+			     anim.SetFloat ("Direction", h); 						// Animator側で設定している"Direction"パラメタにhを渡す
+			     anim.speed = animSpeed;								// Animatorのモーション再生速度に animSpeedを設定する
+			     rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
 		
 		
 		
 			// 以下、キャラクターの移動処理
-			velocity = new Vector3 (0, 0, v);		// 上下のキー入力からZ軸方向の移動量を取得
+			     velocity = new Vector3 (0, 0, v);		// 上下のキー入力からZ軸方向の移動量を取得
 			// キャラクターのローカル空間での方向に変換
-			velocity = transform.TransformDirection (velocity);
+			     velocity = transform.TransformDirection (velocity);
 			//以下のvの閾値は、Mecanim側のトランジションと一緒に調整する
-			if (v > 0.1) {
-				velocity *= forwardSpeed;		// 移動速度を掛ける
-			} else if (v < -0.1) {
-				velocity *= backwardSpeed;	// 移動速度を掛ける
-			}
+			     if (v > 0.1) {
+				    velocity *= forwardSpeed;		// 移動速度を掛ける
+			     } else if (v < -0.1) {
+				    velocity *= backwardSpeed;	// 移動速度を掛ける
+			     }
 		
-			if (Input.GetButtonDown ("Jump")) {	// スペースキーを入力したら
+			     if (Input.GetButtonDown ("Jump")) {	// スペースキーを入力したら
 
-				//アニメーションのステートがLocomotionの最中のみジャンプできる
-				if (currentBaseState.fullPathHash == locoState) {
+				    //アニメーションのステートがLocomotionの最中のみジャンプできる
+				    if (currentBaseState.fullPathHash == locoState) {
 					//ステート遷移中でなかったらジャンプできる
-					if (!anim.IsInTransition (0)) {
-						rb.AddForce (Vector3.up * jumpPower, ForceMode.VelocityChange);
-						anim.SetBool ("Jump", true);		// Animatorにジャンプに切り替えるフラグを送る
-					}
-				}
-			}
+					   if (!anim.IsInTransition (0)) {
+						  rb.AddForce (Vector3.up * jumpPower, ForceMode.VelocityChange);
+						  anim.SetBool ("Jump", true);		// Animatorにジャンプに切り替えるフラグを送る
+					   }
+				    }
+			     }
 		
 
-			// 上下のキー入力でキャラクターを移動させる
-			transform.localPosition += velocity * Time.fixedDeltaTime;
+			 // 上下のキー入力でキャラクターを移動させる
+			     transform.localPosition += velocity * Time.fixedDeltaTime;
 
-			// 左右のキー入力でキャラクタをY軸で旋回させる
-			transform.Rotate (0, h * rotateSpeed, 0);	
+			     // 左右のキー入力でキャラクタをY軸で旋回させる
+			     transform.Rotate (0, h * rotateSpeed, 0);
+            }	
 	
 
 			// 以下、Animatorの各ステート中での処理
 			// Locomotion中
 			// 現在のベースレイヤーがlocoStateの時
-			if (currentBaseState.fullPathHash == locoState) {
+		if (currentBaseState.fullPathHash == locoState) {
 				//カーブでコライダ調整をしている時は、念のためにリセットする
-                idleTime = 0;
-				if (useCurves) {
-					resetCollider ();
-				}
+            idleTime = 0;
+			if (useCurves) {
+				resetCollider ();
 			}
+		}
 		// JUMP中の処理
 		// 現在のベースレイヤーがjumpStateの時
 		else if (currentBaseState.fullPathHash == jumpState) {
@@ -167,7 +175,7 @@ namespace UnityChan
 
                 if (idleTime > 360)
                 {
-                    int rand = Random.Range(0, 2);
+                    int rand = Random.Range(0, 3);
 
                     switch (rand)
                     {
@@ -175,10 +183,13 @@ namespace UnityChan
                             anim.SetBool("Rest", true);
                             break;
                         case 1:
+                            anim.SetBool("IdleAnim", true);
+                            break;
+                        case 2:
                             anim.SetBool("IdleAnim2", true);
                             break;
                         default:
-                            anim.SetBool("IdleAnim2", true);
+                            anim.SetBool("IdleAnim", true);
                             break;
                     }
                     
@@ -192,11 +203,13 @@ namespace UnityChan
 			}
 		// REST中の処理
 		// 現在のベースレイヤーがrestStateの時
-		else if (currentBaseState.fullPathHash == restState || currentBaseState.fullPathHash == waitState) {
+		else if (currentBaseState.fullPathHash == restState || currentBaseState.fullPathHash == waitState 
+                                                            || currentBaseState.fullPathHash == waitState2) {
 				//cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
 				// ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
 				if (!anim.IsInTransition (0)) {
 					anim.SetBool ("Rest", false);
+                    anim.SetBool("IdleAnim", false);
                     anim.SetBool("IdleAnim2", false);
 				}
                 if (Input.GetButtonDown ("Jump") && !anim.IsInTransition (0)) {
@@ -214,5 +227,15 @@ namespace UnityChan
 			col.height = orgColHight;
 			col.center = orgVectColCenter;
 		}
+
+        public void openGame()
+        {
+            gameStart = true;
+        }
+
+        public void restartGame()
+        {
+            gameStart = false;
+        }
 	}
 }

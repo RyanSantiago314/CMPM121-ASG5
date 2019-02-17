@@ -8,6 +8,7 @@ TagManager:
   - Hall
   - Room2
   - Card
+  - Terminal
   layers:
   - Default
   - TransparentFX
